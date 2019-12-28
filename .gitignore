@@ -6,7 +6,7 @@ docs/
 level_format.so
 level_format.dylib
 level_format.dll
-level_format.a
+liblevel_format.a
 level_format.lib
 level_format-test-*
 *.exe
