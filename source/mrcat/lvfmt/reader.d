@@ -24,11 +24,6 @@ import std.stdio;
 import mrcat.lvfmt.object;
 import mrcat.lvfmt.level;
 
-class LevelFormatException : Exception {
-    ///
-    mixin basicExceptionCtors;
-}
-
 Level!T readLevel(T : BaseObject)(inout string filename) {
     File file = File(filename);
     auto l = new Level!T();
@@ -36,7 +31,7 @@ Level!T readLevel(T : BaseObject)(inout string filename) {
     const int width  = file.rawRead(new int[1])[0];
     const int height = file.rawRead(new int[1])[0];
     const byte bitWidth = file.rawRead(new byte[1])[0];
-    if (bitWidth % 8 != 0) throw new LevelFormatException("Invalid bit width");
+    if (bitWidth % 8 != 0) throw new Exception("Invalid bit width");
 
     file.rawRead(new byte[3]); // Reserved header space
 
@@ -59,10 +54,16 @@ Level!T readLevel(T : BaseObject)(inout string filename) {
 
     auto objects = appender!(T[])();
 
+    // File pointer operations to check for EOF
+    FILE* fp = file.getFP();
+    int c = getc(fp);
+
     while (!file.eof()) {
+        ungetc(c, fp);
         T obj = new T;
-        obj.serialize(file);
+        obj.deserialize(file);
         objects.put(obj);
+        c = getc(fp);
     }
 
     l.objects = objects[];
@@ -72,8 +73,15 @@ Level!T readLevel(T : BaseObject)(inout string filename) {
 
 version(unittest) {
     class TestObject : BaseObject {
-        override void deserialize(ref File f) {}
-        override void serialize(ref File f) {}
+        override void deserialize(File f) {
+            lVal = f.rawRead(new long[1])[0];
+        }
+
+        override void serialize(File f) {
+            f.rawWrite([lVal]);
+        }
+
+        long lVal;
     }
 }
 
@@ -82,4 +90,6 @@ unittest {
     assert(l.map.length == 0x10);
     assert(l.map[0].length == 0x10);
     assert(l.map[4][2] == 0x05);
+    assert(l.objects[0].lVal == 0x10);
+    assert(l.objects[1].lVal == 0x1000);
 }

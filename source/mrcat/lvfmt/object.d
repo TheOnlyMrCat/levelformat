@@ -22,8 +22,8 @@ import std.stdio;
 interface BaseObject {
     /// Create from serialized file data.
     /// The file will be initialized to the start of the object's data
-    void deserialize(ref File f);
+    void deserialize(File f);
 
     /// Write data about the object to a file
-    void serialize(ref File f);
+    void serialize(File f);
 }
