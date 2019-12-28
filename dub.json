@@ -1,0 +1,9 @@
+{
+	"authors": [
+		"TheOnlyMrCat"
+	],
+	"copyright": "Copyright © 2019, TheOnlyMrCat",
+	"description": "A file format for 2D levels",
+	"license": "LGPL-3.0",
+	"name": "level_format"
+}

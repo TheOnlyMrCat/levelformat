@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/level_format
+level_format.so
+level_format.dylib
+level_format.dll
+level_format.a
+level_format.lib
+level_format-test-*
+*.exe
+*.o
+*.obj
+*.lst
