@@ -21,7 +21,7 @@ import mrcat.lvfmt.object;
 
 alias Map = long[][];
 
-class Level {
+class Level(T : BaseObject) {
     Map map;
-    BaseObject[] objects;
+    T[] objects;
 }

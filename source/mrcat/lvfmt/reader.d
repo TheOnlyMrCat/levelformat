@@ -17,9 +17,11 @@
 
 module mrcat.lvfmt.reader;
 
+import std.array : appender;
 import std.exception;
 import std.stdio;
 
+import mrcat.lvfmt.object;
 import mrcat.lvfmt.level;
 
 class LevelFormatException : Exception {
@@ -27,9 +29,9 @@ class LevelFormatException : Exception {
     mixin basicExceptionCtors;
 }
 
-Level readLevel(inout string filename) @safe {
+Level!T readLevel(T : BaseObject)(inout string filename) {
     File file = File(filename);
-    Level l = new Level();
+    auto l = new Level!T();
 
     const int width  = file.rawRead(new int[1])[0];
     const int height = file.rawRead(new int[1])[0];
@@ -55,11 +57,28 @@ Level readLevel(inout string filename) @safe {
         }
     }
 
+    auto objects = appender!(T[])();
+
+    while (!file.eof()) {
+        T obj = new T;
+        obj.serialize(file);
+        objects.put(obj);
+    }
+
+    l.objects = objects[];
+
     return l;
 }
 
+version(unittest) {
+    class TestObject : BaseObject {
+        override void deserialize(ref File f) {}
+        override void serialize(ref File f) {}
+    }
+}
+
 unittest {
-    Level l = readLevel("test/map.lft");
+    auto l = readLevel!TestObject("test/map.lft");
     assert(l.map.length == 0x10);
     assert(l.map[0].length == 0x10);
     assert(l.map[4][2] == 0x05);
